@@ -1,0 +1,4 @@
+[container.image]
+repository="xlight05"
+name="no-graal"
+base="ballerina/jvm-runtime:1.0"
