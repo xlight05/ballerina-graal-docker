@@ -7,7 +7,6 @@ COPY resource-config.json build/
 COPY serialization-config.json build/
 
 RUN cd build && native-image -jar hello_svc.jar \
- --static \
  --no-fallback \
  --enable-url-protocols=http,https \
  --initialize-at-build-time=org.slf4j \
@@ -28,6 +27,19 @@ RUN cd build && native-image -jar hello_svc.jar \
  -H:Name=output
 
 FROM alpine
+
+ENV GLIBC_VERSION=2.27-r0 
+
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+    &&  wget "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_VERSION/glibc-$GLIBC_VERSION.apk" \
+    &&  apk --no-cache add "glibc-$GLIBC_VERSION.apk" \
+    &&  rm "glibc-$GLIBC_VERSION.apk" \
+    &&  wget "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_VERSION/glibc-bin-$GLIBC_VERSION.apk" \
+    &&  apk --no-cache add "glibc-bin-$GLIBC_VERSION.apk" \
+    &&  rm "glibc-bin-$GLIBC_VERSION.apk" 
+    # &&  wget "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_VERSION/glibc-i18n-$GLIBC_VERSION.apk" \
+    # &&  apk --no-cache add "glibc-i18n-$GLIBC_VERSION.apk" \
+    # &&  rm "glibc-i18n-$GLIBC_VERSION.apk"
 
 COPY --from=build /app/build/output /
 
